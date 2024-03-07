@@ -27,8 +27,8 @@ Flask-API-App
     DB_SERVER=db
     DB_PORT=1433
     DB_USER=sa
-    DB_PASSWORD=Admin@123
-    DB_NAME=WebsitesDB
+    DB_PASSWORD=YourPassword
+    DB_NAME=YourDataBase
     ```
 
 4. Build and start the Docker containers:
