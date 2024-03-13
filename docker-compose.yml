@@ -3,7 +3,10 @@ version: '3'
 services:
   flask-app:
     build:
-      context: .
+      context: ./
+      dockerfile: DockerFile
+    image: flaskassign/app
+    container_name: flask-app
     ports:
       - "5000:5000"
     environment:
@@ -19,6 +22,7 @@ services:
   db:
     build: 
       context: ./db
-      dockerfile: dockerfile
+      dockerfile: DockerFile
+    container_name: mssql-db
     ports:
         - 1434:1434
