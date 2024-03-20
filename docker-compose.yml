@@ -15,13 +15,16 @@ services:
       DB_USER: ${DB_USER}
       DB_PASSWORD: ${DB_PASSWORD}
       DB_NAME: ${DB_NAME}
-    depends_on:
-      - db
+    # depends_on:
+    #   - db
+    restart: always
 
 
   db:
     build: 
       context: ./db
+      args:
+        SA_PASSWORD: ${DB_PASSWORD}
       dockerfile: DockerFile
     container_name: mssql-db
     ports:

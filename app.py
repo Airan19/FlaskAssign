@@ -17,6 +17,7 @@ DB_USER = getenv('DB_USER')
 DB_PASSWORD = getenv('DB_PASSWORD')
 DB_SERVER = getenv('DB_SERVER')
 DB_PORT = getenv('DB_PORT')
+DB_MASTER = getenv('DB_MASTER')
 
 
 # Check if running in Docker environment
@@ -25,27 +26,75 @@ if getenv('DOCKER_ENV') == 'true':
     DB_SERVER += ','+DB_PORT
 
 
-# Wait for MSSQL server to be ready
-def wait_for_mssql():
-    max_retries = 10
-    retries = 0
-    while retries < max_retries:
-        try:
-            conn = pymssql.connect(server=DB_SERVER, user='sa', password=DB_PASSWORD, database=DB_NAME)
-            conn.close()
-            return True
-        except Exception as e:
-            print(f"Connection to MSSQL server failed. Retrying ({retries+1}/{max_retries})...")
-            retries += 1
-            time.sleep(5)  # Wait for 5 seconds before retrying
-    print("Max retries reached. Unable to connect to MSSQL server.")
-    return False
+# # Wait for MSSQL server to be ready
+# def wait_for_mssql():
+#     max_retries = 10
+#     retries = 0
+#     while retries < max_retries:
+#         try:
+#             conn = pymssql.connect(server=DB_SERVER, user=DB_USER, password=DB_PASSWORD, database=DB_MASTER)
+#             conn.close()
+#             return True
+#         except Exception as e:
+#             print(f"Connection to MSSQL server failed. Retrying ({retries+1}/{max_retries})...")
+#             retries += 1
+#             time.sleep(5)  # Wait for 5 seconds before retrying
+#     print("Max retries reached. Unable to connect to MSSQL server.")
+#     return False
 
 
-# Wait for MSSQL server to be ready before starting the Flask app
-if not wait_for_mssql():
+# # Wait for MSSQL server to be ready before starting the Flask app
+# if not wait_for_mssql():
+#     exit(1)
+
+
+def create_database_and_table_if_not_exists():
+    try:
+        conn = pymssql.connect(server=DB_SERVER, user=DB_USER, password=DB_PASSWORD, database=DB_MASTER)
+        cursor = conn.cursor()
+        cursor.execute("SELECT COUNT(*) FROM sys.databases WHERE name = 'WebsitesDB'")
+        exists = cursor.fetchone()[0]
+        if not exists:
+
+            # Create Database
+            conn.autocommit(True)
+            cursor = conn.cursor()
+            cursor.execute("CREATE DATABASE WebsitesDB")
+            conn.autocommit(False)
+
+            print('WebsitesDB created succesfully.')
+
+            # Switch to WebsitesDB
+            cursor.execute("USE WebsitesDB")
+
+
+        else:
+            print('WebsitesDB already exists.')
+
+        cursor.execute("SELECT COUNT(*) FROM sys.tables WHERE name = 'Websites'")
+        exists = cursor.fetchone()[0]
+        if not exists:
+            # Create websites table
+            cursor.execute("""CREATE TABLE websites(\
+                           id INT PRIMARY KEY IDENTITY (1,1),\
+                           site_name VARCHAR(100),\
+                           url VARCHAR(255),\
+                           status VARCHAR(4)\
+            )""")
+            conn.commit()
+            print('Websites table created successfully.')
+        else:
+            print('Websites table already exists.')
+
+    except pymssql.Error as e:
+        print(f"Error {e}")
+        return False
+    
+    return True
+
+
+if not create_database_and_table_if_not_exists():
     exit(1)
-
 conn = pymssql.connect(server=DB_SERVER, user=DB_USER, password=DB_PASSWORD, database=DB_NAME)
 
 
