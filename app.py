@@ -4,11 +4,11 @@ from os import getenv
 from flask_apscheduler import APScheduler
 import pymssql
 import requests
-import time
+
 
 app = Flask(__name__)
 scheduler = APScheduler()
-load_dotenv()
+load_dotenv('env')
 
 
 #Database Configuration
@@ -50,7 +50,8 @@ if getenv('DOCKER_ENV') == 'true':
 
 def create_database_and_table_if_not_exists():
     try:
-        conn = pymssql.connect(server=DB_SERVER, user=DB_USER, password=DB_PASSWORD, database=DB_MASTER)
+        
+        conn = pymssql.connect(server=DB_SERVER,port = DB_PORT, user=DB_USER, password=DB_PASSWORD, database=DB_MASTER )
         cursor = conn.cursor()
         cursor.execute("SELECT COUNT(*) FROM sys.databases WHERE name = 'WebsitesDB'")
         exists = cursor.fetchone()[0]
@@ -136,6 +137,7 @@ def check_website_status():
 # Scheduling the task to run check_website_status function after every 10 seconds
 @scheduler.task('interval', id='check_website_status', seconds=10, misfire_grace_time=900)
 def run_check_website_status():
+    print(scheduler.get_jobs())
     check_website_status()
 
 
