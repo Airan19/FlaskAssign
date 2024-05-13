@@ -1,7 +1,0 @@
-#Database Configuration
-DB_NAME=WebsitesDB
-DB_USER=sa
-DB_PASSWORD=Admin@123
-DB_SERVER=172.17.0.2
-DB_PORT=1433
-DB_MASTER=master
