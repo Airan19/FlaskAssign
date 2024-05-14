@@ -1,4 +1,4 @@
-import logging
+import logger
 import pymssql
 
 class DatabaseManager:
@@ -9,7 +9,7 @@ class DatabaseManager:
         self.password = password
         self.database = database
         self.main_db = main_db
-        self.log = logging.getLogger(log_name)
+        self.log = logger.Logger()
         self._conn = None
 
     

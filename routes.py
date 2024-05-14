@@ -3,8 +3,11 @@ from main import scheduler
 from db import DatabaseManager
 import requests
 import config
+from logger import Logger
 
 web_api_bp = Blueprint('web_api', __name__)
+log = Logger()
+
 
 def execute_sql_query(query, params=None, fetchone=False, fetchall=False):
     configs = config.get_configs(app)
@@ -26,13 +29,13 @@ def check_status(url):
         if 200 <= response < 300 :
             new_status = 'UP'
     except Exception as e:
-        print('Error faced while requesting the url', e)
+        log.error('Error faced while requesting the url', e)
     return new_status
 
 
 # Checking the status of the websites
 def check_website_status():
-    print('Scheduled job running')
+    log.info('Scheduled job running')
     websites = execute_sql_query('SELECT id, url, status FROM websites', fetchall=True)
     for website in websites:
         id, url, prev_status = website

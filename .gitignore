@@ -1,3 +1,4 @@
 flaskenv/
 .env
 env
+__pycache__/
